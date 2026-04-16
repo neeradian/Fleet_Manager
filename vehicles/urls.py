@@ -35,5 +35,23 @@ urlpatterns = [
     path('vehicles/<int:pk>/edit/',      views.vehicle_edit,   name='vehicle_edit'),
     path('vehicles/<int:pk>/delete/',    views.vehicle_delete, name='vehicle_delete'),
 
-    
+    path('vehicles/<int:vehicle_pk>/rto/',         views.rto_add_edit, name='rto_add_edit'),
+    path('vehicles/<int:vehicle_pk>/rto/doc/add/', views.rto_doc_add,  name='rto_doc_add'),
+    path('rto/doc/<int:pk>/delete/',               views.rto_doc_delete, name='rto_doc_delete'),
+
+    path('vehicles/<int:vehicle_pk>/tyre/add/', views.tyre_add,    name='tyre_add'),
+    path('tyre/<int:pk>/edit/',                 views.tyre_edit,   name='tyre_edit'),
+    path('tyre/<int:pk>/delete/',               views.tyre_delete, name='tyre_delete'),
+
+    path('services/',                              views.service_list,   name='service_list'),
+    path('vehicles/<int:vehicle_pk>/service/add/', views.service_add,    name='service_add'),
+    path('service/<int:pk>/edit/',                 views.service_edit,   name='service_edit'),
+    path('service/<int:pk>/delete/',               views.service_delete, name='service_delete'),
+
+    path('fuel/',                              views.fuel_list,   name='fuel_list'),
+    path('vehicles/<int:vehicle_pk>/fuel/add/', views.fuel_add,   name='fuel_add'),
+    path('fuel/<int:pk>/edit/',                views.fuel_edit,   name='fuel_edit'),
+    path('fuel/<int:pk>/delete/',              views.fuel_delete, name='fuel_delete'),
+
+    path('reports/', views.report_view, name='reports'),
 ]
