@@ -1,5 +1,5 @@
 
-# 🚛 FleetTrack Pro — Django Vehicle Management System
+# 🚛 FleetTrack Pro —  Vehicle Management System
 
 A full-featured Django web application for managing your vehicle fleet including service records, tyre changes, fuel logs, and RTO compliance with role-based auth, document uploads, filtered reports, and clean static CSS/JS architecture.
 
