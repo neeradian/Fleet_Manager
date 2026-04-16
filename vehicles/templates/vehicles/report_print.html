@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FleetTrack Report — {{ generated_at }}</title>
+    <style>
+      /* --------------Fonts -------------*/
+      @import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600;700&display=swap");
+
+      /* --------------------- Tokens ---------------------- */
+      :root {
+        --gold: #d97706;
+        --gold-bg: #fef3c7;
+        --blue: #1d4ed8;
+        --blue-bg: #eff6ff;
+        --green: #166534;
+        --green-bg: #dcfce7;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --stripe: #f8fafc;
+        --text: #1e293b;
+        --hf: "Barlow Condensed", Arial, sans-serif;
+        --bf: "Barlow", Arial, sans-serif;
+      }
+
+      /* --------------------- Reset ---------------------- */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* --------------- Screen: show page on light grey canvas ---------- */
+      body {
+        font-family: var(--bf);
+        font-size: 12px;
+        color: var(--text);
+        background: #e2e8f0;
+        min-height: 100vh;
+      }
+
+      /* ----------- Print toolbar (SCREEN ONLY, hidden when printing) ---------------- */
+      .toolbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        background: #1e293b;
+        border-bottom: 3px solid var(--gold);
+        padding: 10px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        box-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+      }
+      .toolbar-brand {
+        font-family: var(--hf);
+        font-size: 18px;
+        font-weight: 900;
+        letter-spacing: 2px;
+        color: var(--gold);
+        text-transform: uppercase;
+      }
+      .toolbar-hint {
+        flex: 1;
+        text-align: center;
+        font-size: 12px;
+        color: #94a3b8;
+        line-height: 1.5;
+      }
+      .toolbar-hint strong {
+        color: #e2e8f0;
+      }
+      .toolbar-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .btn-print {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--gold);
+        color: #000;
+        border: none;
+        padding: 9px 20px;
+        border-radius: 5px;
+        font-size: 13px;
+        font-weight: 700;
+        font-family: var(--hf);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .btn-print:hover {
+        background: #b45309;
+        color: #fff;
+      }
+      .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: transparent;
+        color: #94a3b8;
+        border: 1px solid #334155;
+        padding: 8px 14px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.15s;
+      }
+      .btn-back:hover {
+        color: #e2e8f0;
+        border-color: #94a3b8;
+      }
+
+      /* -------------- Page canvas on screen ------------ */
+      .page {
+        max-width: 1050px;
+        margin: 76px auto 40px;
+        background: #fff;
+        border-radius: 6px;
+        box-shadow: 0 4px 28px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+      }
+      .page-body {
+        padding: 36px 40px 32px;
+      }
+
+      /* ---------------------- Report header ------------------ */
+      .rpt-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding-bottom: 14px;
+        border-bottom: 3px solid var(--gold);
+        margin-bottom: 20px;
+      }
+      .rpt-logo {
+        font-family: var(--hf);
+        font-size: 30px;
+        font-weight: 900;
+        letter-spacing: 3px;
+        color: var(--gold);
+        text-transform: uppercase;
+        line-height: 1;
+      }
+      .rpt-logo-sub {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 3px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+      .rpt-meta {
+        text-align: right;
+        font-size: 11.5px;
+        color: var(--muted);
+        line-height: 2;
+      }
+      .rpt-meta strong {
+        color: var(--text);
+      }
+
+      /* --------------------- Summary stat boxes ---------------------- */
+      .stats-row {
+        display: flex;
+        gap: 14px;
+        margin-bottom: 22px;
+      }
+      .stat {
+        flex: 1;
+        background: var(--stripe);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 13px 16px;
+        border-left: 4px solid var(--gold);
+      }
+      .stat.blue {
+        border-left-color: var(--blue);
+      }
+      .stat.green {
+        border-left-color: #22c55e;
+      }
+      .stat.gray {
+        border-left-color: #94a3b8;
+      }
+      .stat-lbl {
+        font-size: 9px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 4px;
+        font-weight: 700;
+      }
+      .stat-val {
+        font-family: var(--hf);
+        font-size: 26px;
+        font-weight: 900;
+        color: var(--text);
+        line-height: 1;
+      }
+      .stat-sub {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+
+      /* ------------------------- Section ----------------- */
+      .section {
+        margin-bottom: 26px;
+      }
+      .section-title {
+        font-family: var(--hf);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--gold);
+        padding: 6px 0 5px;
+        border-bottom: 2px solid var(--gold);
+        margin-bottom: 11px;
+      }
+
+      /* ---------------------- Tables ---------------------- */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+      }
+      thead th {
+        background: #f1f5f9;
+        color: #475569;
+        font-weight: 700;
+        font-size: 9px;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        padding: 8px 10px;
+        text-align: left;
+        border-top: 1px solid var(--border);
+        border-bottom: 2px solid var(--border);
+      }
+      tbody tr {
+        border-bottom: 1px solid #f1f5f9;
+      }
+      tbody tr:nth-child(even) {
+        background: var(--stripe);
+      }
+      tbody td {
+        padding: 7px 10px;
+        vertical-align: middle;
+      }
+      tfoot td {
+        padding: 8px 10px;
+        font-weight: 700;
+        background: var(--gold-bg);
+        border-top: 2px solid var(--gold);
+      }
+
+      /* --------------------- Cell helpers ---------------------- */
+      .plate {
+        font-family: var(--hf);
+        font-weight: 800;
+        font-size: 13px;
+        letter-spacing: 1.5px;
+        color: var(--gold);
+      }
+      .km-pill {
+        display: inline-block;
+        background: var(--blue-bg);
+        color: var(--blue);
+        padding: 1px 8px;
+        border-radius: 3px;
+        font-weight: 700;
+        font-size: 10px;
+      }
+      .chk {
+        color: var(--green);
+        font-weight: 800;
+        font-size: 14px;
+      }
+      .dash {
+        color: #cbd5e1;
+      }
+      .amt {
+        font-weight: 700;
+      }
+      .mil {
+        color: #16a34a;
+        font-weight: 700;
+      }
+
+      /* --------------------- Footer strip ---------------------- */
+      .rpt-footer {
+        margin-top: 26px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: #94a3b8;
+      }
+      .watermark {
+        background: linear-gradient(90deg, #fef3c720, #eff6ff20);
+        border-top: 1px solid var(--border);
+        padding: 7px 40px;
+        font-size: 9.5px;
+        color: #94a3b8;
+        text-align: center;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+
+      /* ═══════════════════════════════════════════════════
+       @MEDIA PRINT — what actually goes into the PDF
+       ═══════════════════════════════════════════════════ */
+      @media print {
+        @page {
+          size: A4 landscape;
+          margin: 13mm 15mm 13mm 15mm;
+        }
+
+        /* Hide interactive chrome */
+        .toolbar {
+          display: none !important;
+        }
+
+        /* Clean white background, no shadow */
+        body {
+          background: #fff;
+        }
+        .page {
+          margin: 0;
+          max-width: 100%;
+          border-radius: 0;
+          box-shadow: none;
+        }
+        .page-body {
+          padding: 0;
+        }
+
+        /* Preserve background colours (stripes, badges, stat cards) */
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+
+        /* Pagination */
+        .section {
+          page-break-inside: avoid;
+        }
+        table {
+          page-break-inside: auto;
+        }
+        thead {
+          display: table-header-group;
+        } /* repeat headers on each page */
+        tfoot {
+          display: table-footer-group;
+        }
+        tr {
+          page-break-inside: avoid;
+        }
+
+        /* Slightly tighter for A4 */
+        .stats-row {
+          gap: 10px;
+          margin-bottom: 16px;
+        }
+        .stat {
+          padding: 10px 12px;
+        }
+        .stat-val {
+          font-size: 22px;
+        }
+        .section {
+          margin-bottom: 18px;
+        }
+        .rpt-header {
+          margin-bottom: 14px;
+        }
+        .rpt-logo {
+          font-size: 24px;
+        }
+        body,
+        table {
+          font-size: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ---------------- Toolbar (screen only) ----------- -->
+    <div class="toolbar">
+      <div class="toolbar-brand">🚛 FleetTrack</div>
+      <div class="toolbar-hint">
+        Click <strong>Print / Save as PDF</strong> → in the print dialog select
+        <strong>"Save as PDF"</strong> as the destination. Choose
+        <strong>A4 Landscape</strong> for best results.
+      </div>
+      <div class="toolbar-actions">
+        <a href="javascript:history.back()" class="btn-back"
+          >← Back to Reports</a
+        >
+        <button class="btn-print" onclick="window.print()">
+          🖨 Print / Save as PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- ---------------- Report page ------------------- -->
+    <div class="page">
+      <div class="page-body">
+        <!-- Header -->
+        <div class="rpt-header">
+          <div>
+            <div class="rpt-logo">🚛 FleetTrack Pro</div>
+            <div class="rpt-logo-sub">
+              Vehicle Management System · Fleet Report
+            </div>
+          </div>
+          <div class="rpt-meta">
+            <strong>Generated:</strong> {{ generated_at }}<br />
+            {% if selected_vehicle %}
+                <strong>Vehicle:</strong> {{ selected_vehicle.vehicle_no }} — {{ selected_vehicle.brand }} {{ selected_vehicle.model_name }}<br />
+            {% endif %}
+            {% if date_from or date_to %}
+                <strong>Period:</strong> {{ date_from|default:"All records" }} → {{ date_to|default:"Today" }}<br />
+            {% endif %}
+            <strong>Report type:</strong> {{ report_type|capfirst }}
+          </div>
+        </div>
+
+        <!-- Summary stats -->
+        <div class="stats-row">
+          {% if vehicle_list %}
+          <div class="stat">
+            <div class="stat-lbl">Vehicles</div>
+            <div class="stat-val">{{ vehicle_list|length }}</div>
+            <div class="stat-sub">In this report</div>
+          </div>
+          {% endif %} {% if fuel_records %}
+          <div class="stat blue">
+            <div class="stat-lbl">Total Fuel Cost</div>
+            <div class="stat-val">₹{{ fuel_total|floatformat:0 }}</div>
+            <div class="stat-sub">
+              {{ fuel_litres|floatformat:1 }} L · {{ fuel_records|length }}
+              fills
+            </div>
+          </div>
+          {% endif %} {% if service_records %}
+          <div class="stat green">
+            <div class="stat-lbl">Total Service Cost</div>
+            <div class="stat-val">₹{{ service_total|floatformat:0 }}</div>
+            <div class="stat-sub">{{ service_records|length }} records</div>
+          </div>
+          {% endif %}
+          <div class="stat gray">
+            <div class="stat-lbl">Grand Total</div>
+            <div class="stat-val">
+              ₹{% comment %}simple sum below{% endcomment %}
+              {{ fuel_total|add:service_total|floatformat:0 }}
+            </div>
+            <div class="stat-sub">Fuel + Service combined</div>
+          </div>
+        </div>
+
+        <!-- ---------------- Vehicle section ------------------- -->
+        {% if vehicle_list %}
+        <div class="section">
+          <div class="section-title">🚗 Vehicle Summary</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Vehicle No.</th>
+                <th>Brand / Model</th>
+                <th>Type</th>
+                <th>Fuel</th>
+                <th>Year</th>
+                <th>Odometer</th>
+                <th>Driver</th>
+                <th>Registration No.</th>
+                <th>Color</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for v in vehicle_list %}
+              <tr>
+                <td class="plate">{{ v.vehicle_no }}</td>
+                <td><strong>{{ v.brand }}</strong> {{ v.model_name }}</td>
+                <td>{{ v.get_vehicle_type_display }}</td>
+                <td>{{ v.get_fuel_type_display }}</td>
+                <td>{{ v.manufacture_year }}</td>
+                <td><span class="km-pill">{{ v.current_km }} km</span></td>
+                <td>{{ v.owner_name|default:"—" }}</td>
+                <td style="font-family: monospace; font-size: 10px">
+                  {{ v.registration_no }}
+                </td>
+                <td>{{ v.color|default:"—" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+
+        <!-- ---------------- Fuel section ------------------- -->
+        {% if fuel_records %}
+        <div class="section">
+          <div class="section-title">⛽ Fuel Records</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Vehicle</th>
+                <th>Date</th>
+                <th>Odometer</th>
+                <th>Litres</th>
+                <th>₹/Litre</th>
+                <th>Total (₹)</th>
+                <th>Mileage</th>
+                <th>Station</th>
+                <th>Recorded By</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for f in fuel_records %}
+              <tr>
+                <td class="plate">{{ f.vehicle.vehicle_no }}</td>
+                <td>{{ f.fill_date }}</td>
+                <td><span class="km-pill">{{ f.km_at_fill }}</span></td>
+                <td>{{ f.litres_filled }} L</td>
+                <td>₹ {{ f.price_per_litre }}</td>
+                <td class="amt">₹ {{ f.total_amount }}</td>
+                <td>
+                  {% if f.mileage %}<span class="mil">{{ f.mileage }} km/L</span
+                  >{% else %}<span class="dash">—</span>{% endif %}
+                </td>
+                <td>{{ f.fuel_station|default:"—" }}</td>
+                <td>{{ f.created_by.username|default:"—" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3"><strong>TOTAL</strong></td>
+                <td><strong>{{ fuel_litres|floatformat:2 }} L</strong></td>
+                <td></td>
+                <td><strong>₹ {{ fuel_total|floatformat:2 }}</strong></td>
+                <td colspan="3"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        {% endif %}
+
+        <!-- ── Service section ─────────────────────────── -->
+        {% if service_records %}
+        <div class="section">
+          <div class="section-title">🔧 Service Records</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Vehicle</th>
+                <th>Date</th>
+                <th>KM</th>
+                <th>Engine Oil</th>
+                <th>Oil Filter</th>
+                <th>Air Filter</th>
+                <th>Coolant</th>
+                <th>Brake Fluid</th>
+                <th>AC</th>
+                <th>Brakes</th>
+                <th>Cost (₹)</th>
+                <th>Next KM</th>
+                <th>Service Center</th>
+                <th>By</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in service_records %}
+              <tr>
+                <td class="plate">{{ s.vehicle.vehicle_no }}</td>
+                <td>{{ s.service_date }}</td>
+                <td><span class="km-pill">{{ s.km_at_service }}</span></td>
+                <td>
+                  {% if s.engine_oil_changed %}<span class="chk">✓</span>
+                  {% else %}<span class="dash">—</span>{% endif %}
+                </td>
+                <td>
+                  {% if s.oil_filter_changed %}<span class="chk">✓</span>
+                  {% else %}<span class="dash">—</span>{% endif %}
+                </td>
+                <td>
+                  {% if s.air_filter_changed %}<span class="chk">✓</span>
+                  {% else %}<span class="dash">—</span>{% endif %}
+                </td>
+                <td>
+                  {% if s.coolant_service_done %}<span class="chk">✓</span>
+                  {% else %}<span class="dash">—</span>{% endif %}
+                </td>
+                <td>
+                  {% if s.brake_fluid_changed %}<span class="chk">✓</span>
+                  {% else %}<span class="dash">—</span>{% endif %}
+                </td>
+                <td>
+                  {% if s.ac_service %}<span class="chk">✓</span>{% else %}<span
+                    class="dash"
+                    >—</span
+                  >{% endif %}
+                </td>
+                <td>
+                  {% if s.brake_service %}<span class="chk">✓</span>
+                  {% else %}<span class="dash">—</span>{% endif %}
+                </td>
+                <td class="amt">
+                  {% if s.total_cost %}₹ {{ s.total_cost }}{% else %}<span
+                    class="dash"
+                    >—</span
+                  >{% endif %}
+                </td>
+                <td>
+                  {% if s.next_service_km %}<span class="km-pill"
+                    >{{ s.next_service_km }}</span
+                  >{% else %}<span class="dash">—</span>{% endif %}
+                </td>
+                <td>{{ s.service_center|default:"—" }}</td>
+                <td>{{ s.created_by.username|default:"—" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="10"><strong>TOTAL SERVICE COST</strong></td>
+                <td><strong>₹ {{ service_total|floatformat:2 }}</strong></td>
+                <td colspan="3"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        {% endif %}
+        {% if not vehicle_list and not fuel_records and not service_records %}
+        <div style="text-align: center; padding: 60px; color: #94a3b8">
+          <div style="font-size: 40px; margin-bottom: 12px">📄</div>
+          <div style="font-size: 18px; font-weight: 700">
+            No records match the selected filters
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="rpt-footer">
+          <span>FleetTrack Pro — Vehicle Management System</span>
+          <span
+            >Generated on {{ generated_at }} · Confidential — Internal Use
+            Only</span
+          >
+        </div>
+      </div>
+      <!-- /.page-body -->
+      <div class="watermark">
+        FleetTrack Pro · Vehicle Management System · Confidential
+      </div>
+    </div>
+    <!-- /.page -->
+
+    <!-- <script>
+      // Auto-trigger print dialog after fonts and layout are ready
+      window.addEventListener("load", function () {
+        setTimeout(function () {
+          window.print();
+        }, 500);
+      });
+    </script> -->
+  </body>
+</html>

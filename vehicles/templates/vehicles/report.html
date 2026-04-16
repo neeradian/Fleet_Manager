@@ -1,0 +1,193 @@
+{% extends 'vehicles/base.html' %}
+{% block title %}Reports — FleetTrack{% endblock %}
+{% block page_title %}Reports{% endblock %}
+{% block content %}
+
+<!-- Filter Bar -->
+<form method="get" id="reportForm">
+  <div class="report-filter-bar">
+    <div class="form-group" style="min-width:180px">
+      <label>Report Type</label>
+      <select name="report_type">
+        <option value="combined" {% if report_type == 'combined' %}selected{% endif %}>Combined (All)</option>
+        <option value="vehicle"  {% if report_type == 'vehicle'  %}selected{% endif %}>Vehicles</option>
+        <option value="fuel"     {% if report_type == 'fuel'     %}selected{% endif %}>Fuel</option>
+        <option value="service"  {% if report_type == 'service'  %}selected{% endif %}>Service</option>
+      </select>
+    </div>
+    <div class="form-group" style="min-width:200px">
+      <label>Vehicle</label>
+      <select name="vehicle">
+        <option value="">All Vehicles</option>
+        {% for v in vehicles %}<option value="{{ v.pk }}" {% if vehicle_filter == v.pk|stringformat:"s" %}selected{% endif %}>{{ v.vehicle_no }} — {{ v.brand }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Date From</label>
+      <input type="date" name="date_from" value="{{ date_from }}">
+    </div>
+    <div class="form-group">
+      <label>Date To</label>
+      <input type="date" name="date_to" value="{{ date_to }}">
+    </div>
+    <div class="flex gap-2" style="align-items:flex-end">
+      <button type="submit" class="btn btn-primary">🔍 Generate</button>
+      <a href="{% url 'reports' %}" class="btn btn-outline">✕ Clear</a>
+    </div>
+  </div>
+</form>
+
+<!-- Summary Stats -->
+<div class="stats-grid mb-2">
+  {% if report_type in 'vehicle combined' %}
+  <div class="stat-card">
+    <div class="stat-label">Vehicles</div>
+    <div class="stat-value">{{ vehicle_list|length }}</div>
+    <div class="stat-sub">{% if selected_vehicle %}Filtered{% else %}Total fleet{% endif %}</div>
+  </div>
+  {% endif %}
+  {% if report_type in 'fuel combined' %}
+  <div class="stat-card blue">
+    <div class="stat-label">Fuel Cost</div>
+    <div class="stat-value" style="font-size:22px">₹{{ fuel_total|floatformat:0 }}</div>
+    <div class="stat-sub">{{ fuel_litres|floatformat:1 }} litres · {{ fuel_records|length }} fills</div>
+  </div>
+  {% endif %}
+  {% if report_type in 'service combined' %}
+  <div class="stat-card green">
+    <div class="stat-label">Service Cost</div>
+    <div class="stat-value" style="font-size:22px">₹{{ service_total|floatformat:0 }}</div>
+    <div class="stat-sub">{{ service_records|length }} records</div>
+  </div>
+  {% endif %}
+  <div class="stat-card">
+    <div class="stat-label">Generated</div>
+    <div class="stat-value" style="font-size:16px;padding-top:4px">{{ generated_at }}</div>
+    <div class="stat-sub">{% if date_from or date_to %}{{ date_from|default:"start" }} → {{ date_to|default:"today" }}{% else %}All time{% endif %}</div>
+  </div>
+</div>
+
+<!-- Download button -->
+<div class="flex justify-between items-center mb-2">
+  <div style="font-size:13px;color:var(--muted)">
+    {% if selected_vehicle %}Showing: <strong style="color:var(--text)">{{ selected_vehicle.vehicle_no }}</strong>{% else %}Showing: <strong style="color:var(--text)">All Vehicles</strong>{% endif %}
+    {% if date_from %} · From {{ date_from }}{% endif %}{% if date_to %} to {{ date_to }}{% endif %}
+  </div>
+  <a href="?{{ request.GET.urlencode }}&print=1" target="_blank" class="btn btn-success">🖨 Print / Save as PDF</a>
+</div>
+
+<!-- Vehicle Section -->
+{% if vehicle_list and report_type != 'fuel' and report_type != 'service' %}
+<div class="report-section card mb-2">
+  <div class="card-header">
+    <span class="card-title">🚗 Vehicle Summary</span>
+    <button type="button" data-toggle-section="section-vehicles" class="btn btn-outline btn-sm">▲ Hide</button>
+  </div>
+  <div id="section-vehicles" class="table-wrap">
+    <table>
+      <thead><tr><th>Vehicle No.</th><th>Brand / Model</th><th>Type</th><th>Fuel</th><th>Year</th><th>Odometer</th><th>Owner</th></tr></thead>
+      <tbody>
+        {% for v in vehicle_list %}
+        <tr>
+          <td style="font-family:var(--hf);font-size:15px;letter-spacing:1px;color:var(--accent);font-weight:700">{{ v.vehicle_no }}</td>
+          <td>{{ v.brand }} {{ v.model_name }}</td>
+          <td><span class="badge badge-blue">{{ v.get_vehicle_type_display }}</span></td>
+          <td><span class="badge badge-gray">{{ v.get_fuel_type_display }}</span></td>
+          <td>{{ v.manufacture_year }}</td>
+          <td><span class="km-badge">{{ v.current_km }} km</span></td>
+          <td class="text-muted">{{ v.driver_name|default:"—" }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="7" class="text-muted" style="text-align:center;padding:20px">No vehicles found.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Fuel Section -->
+{% if fuel_records and report_type != 'vehicle' and report_type != 'service' %}
+<div class="report-section card mb-2">
+  <div class="card-header">
+    <span class="card-title">⛽ Fuel Records</span>
+    <button type="button" data-toggle-section="section-fuel" class="btn btn-outline btn-sm">▲ Hide</button>
+  </div>
+  <div id="section-fuel" class="table-wrap">
+    <table>
+      <thead><tr><th>Vehicle</th><th>Date</th><th>KM</th><th>Litres</th><th>₹/Litre</th><th>Total</th><th>Mileage</th><th>Station</th><th>By</th></tr></thead>
+      <tbody>
+        {% for f in fuel_records %}
+        <tr>
+          <td style="font-family:var(--hf);font-size:14px;letter-spacing:1px;color:var(--accent);font-weight:700">{{ f.vehicle.vehicle_no }}</td>
+          <td>{{ f.fill_date }}</td>
+          <td><span class="km-badge">{{ f.km_at_fill }}</span></td>
+          <td>{{ f.litres_filled }}L</td>
+          <td>₹{{ f.price_per_litre }}</td>
+          <td><strong>₹{{ f.total_amount }}</strong></td>
+          <td>{% if f.mileage %}<strong style="color:var(--success)">{{ f.mileage }}</strong> <span class="text-muted text-sm">km/L</span>{% else %}—{% endif %}</td>
+          <td class="text-muted text-sm">{{ f.fuel_station|default:"—" }}</td>
+          <td class="text-muted text-sm">{{ f.created_by.username|default:"—" }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="9" class="text-muted" style="text-align:center;padding:20px">No fuel records.</td></tr>{% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="background:var(--surface2)">
+          <td colspan="3" style="padding:9px 13px;font-weight:700;font-family:var(--hf);letter-spacing:1px;color:var(--muted)">TOTAL</td>
+          <td style="padding:9px 13px;font-weight:700">{{ fuel_litres|floatformat:2 }}L</td>
+          <td></td>
+          <td style="padding:9px 13px;font-weight:700;color:var(--accent)">₹{{ fuel_total|floatformat:2 }}</td>
+          <td colspan="3"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Service Section -->
+{% if service_records and report_type != 'vehicle' and report_type != 'fuel' %}
+<div class="report-section card mb-2">
+  <div class="card-header">
+    <span class="card-title">🔧 Service Records</span>
+    <button type="button" data-toggle-section="section-service" class="btn btn-outline btn-sm">▲ Hide</button>
+  </div>
+  <div id="section-service" class="table-wrap">
+    <table>
+      <thead><tr><th>Vehicle</th><th>Date</th><th>KM</th><th>Engine Oil</th><th>Air Filter</th><th>Coolant</th><th>Brakes</th><th>Cost</th><th>Next Due</th><th>By</th></tr></thead>
+      <tbody>
+        {% for s in service_records %}
+        <tr>
+          <td style="font-family:var(--hf);font-size:14px;letter-spacing:1px;color:var(--accent);font-weight:700">{{ s.vehicle.vehicle_no }}</td>
+          <td>{{ s.service_date }}</td>
+          <td><span class="km-badge">{{ s.km_at_service }}</span></td>
+          <td>{% if s.engine_oil_changed %}<span class="badge badge-green">✓</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+          <td>{% if s.air_filter_changed %}<span class="badge badge-green">✓</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+          <td>{% if s.coolant_service_done %}<span class="badge badge-blue">✓</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+          <td>{% if s.brake_service %}<span class="badge badge-yellow">✓</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+          <td>{% if s.total_cost %}<strong>₹{{ s.total_cost }}</strong>{% else %}—{% endif %}</td>
+          <td class="text-sm text-muted">{% if s.next_service_km %}{{ s.next_service_km }} km{% endif %}{% if s.next_service_date %}<br>{{ s.next_service_date }}{% endif %}{% if not s.next_service_km and not s.next_service_date %}—{% endif %}</td>
+          <td class="text-muted text-sm">{{ s.created_by.username|default:"—" }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="10" class="text-muted" style="text-align:center;padding:20px">No service records.</td></tr>{% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="background:var(--surface2)">
+          <td colspan="7" style="padding:9px 13px;font-weight:700;font-family:var(--hf);letter-spacing:1px;color:var(--muted)">TOTAL</td>
+          <td style="padding:9px 13px;font-weight:700;color:var(--accent)">₹{{ service_total|floatformat:2 }}</td>
+          <td colspan="2"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if not vehicle_list and not fuel_records and not service_records %}
+<div class="card">
+  <div class="card-body" style="text-align:center;padding:60px;color:var(--muted)">
+    <div style="font-size:48px;margin-bottom:12px">📄</div>
+    <div style="font-family:var(--hf);font-size:22px;margin-bottom:8px">No data for selected filters</div>
+    <div>Try changing the report type, vehicle, or date range.</div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
