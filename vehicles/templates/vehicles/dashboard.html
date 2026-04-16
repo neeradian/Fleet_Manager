@@ -1,0 +1,236 @@
+{% extends 'vehicles/base.html' %} {% block title %}Dashboard — FleetTrack{%
+endblock %} {% block page_title %}Dashboard{% endblock %} {% block content %}
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Total Vehicles</div>
+    <div class="stat-value">{{ total_vehicles }}</div>
+    <div class="stat-sub">Registered fleet</div>
+  </div>
+  <div class="stat-card blue">
+    <div class="stat-label">Total Fuel Cost</div>
+    <div class="stat-value" style="font-size: 22px">
+      ₹{{ total_fuel_cost|floatformat:0 }}
+    </div>
+    <div class="stat-sub">All time</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-label">Service Cost</div>
+    <div class="stat-value" style="font-size: 22px">
+      ₹{{ total_service_cost|floatformat:0 }}
+    </div>
+    <div class="stat-sub">All time</div>
+  </div>
+  <div class="stat-card red">
+    <div class="stat-label">Insurance Alerts</div>
+    <div class="stat-value">
+      {{ expired_insurance.count|add:expiring_insurance.count }}
+    </div>
+    <div class="stat-sub">Expired / Expiring</div>
+  </div>
+</div>
+
+{% if expired_insurance or expiring_insurance or expiring_pollution %}
+<div class="card mb-2">
+  <div class="card-header">
+    <span class="card-title">⚠️ Compliance Alerts</span>
+  </div>
+  <div class="card-body">
+    {% for rto in expired_insurance %}
+    <div class="alert alert-error">
+      🚨 <strong>{{ rto.vehicle.vehicle_no }}</strong> — Insurance EXPIRED on 
+      {{ rto.insurance_valid_upto }}{% if request.user.is_admin_role %}<a
+        href="{% url 'rto_add_edit' rto.vehicle.pk %}"
+        class="btn btn-outline btn-sm"
+        style="margin-left: auto"
+        >Update</a
+      >{% endif %}
+    </div>
+    {% endfor %} {% for rto in expiring_insurance %}
+    <div class="alert alert-warning">
+      ⚠️ <strong>{{ rto.vehicle.vehicle_no }}</strong> — Insurance expires 
+      {{ rto.insurance_valid_upto }}
+    </div>
+    {% endfor %} {% for rto in expiring_pollution %}
+    <div class="alert alert-warning">
+      ⚠️ <strong>{{ rto.vehicle.vehicle_no }}</strong> — Pollution cert expires
+      {{ rto.pollution_valid_upto }}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="grid-2 mb-2">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">⛽ Recent Fuel</span
+      ><a href="{% url 'fuel_list' %}" class="btn btn-outline btn-sm"
+        >View All</a
+      >
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Date</th>
+            <th>Litres</th>
+            <th>Total</th>
+            <th>Mileage</th>
+            <th>By</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in recent_fuel %}
+          <tr>
+            <td>
+              <a
+                href="{% url 'vehicle_detail' f.vehicle.pk %}"
+                class="text-accent"
+                style="
+                  font-weight: 700;
+                  text-decoration: none;
+                  font-family: var(--hf);
+                "
+                >{{ f.vehicle.vehicle_no }}</a
+              >
+            </td>
+            <td class="text-muted">{{ f.fill_date }}</td>
+            <td>{{ f.litres_filled }}L</td>
+            <td>₹{{ f.total_amount }}</td>
+            <td>
+              {% if f.mileage %}<strong style="color: var(--success)"
+                >{{ f.mileage }}</strong
+              >
+              <span class="text-muted text-sm">km/L</span>{% else %}—{% endif %}
+            </td>
+            <td class="text-muted text-sm">
+              {{ f.created_by.username|default:"—" }}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td
+              colspan="6"
+              class="text-muted"
+              style="text-align: center; padding: 20px"
+            >
+              No fuel records yet
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🔧 Recent Services</span
+      ><a href="{% url 'service_list' %}" class="btn btn-outline btn-sm"
+        >View All</a
+      >
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Date</th>
+            <th>KM</th>
+            <th>Cost</th>
+            <th>By</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in recent_service %}
+          <tr>
+            <td>
+              <a
+                href="{% url 'vehicle_detail' s.vehicle.pk %}"
+                class="text-accent"
+                style="
+                  font-weight: 700;
+                  text-decoration: none;
+                  font-family: var(--hf);
+                "
+                >{{ s.vehicle.vehicle_no }}</a
+              >
+            </td>
+            <td class="text-muted">{{ s.service_date }}</td>
+            <td><span class="km-badge">{{ s.km_at_service }}</span></td>
+            <td>
+              {% if s.total_cost %}₹{{ s.total_cost }}{% else %}—{% endif %}
+            </td>
+            <td class="text-muted text-sm">
+              {{ s.created_by.username|default:"—" }}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td
+              colspan="5"
+              class="text-muted"
+              style="text-align: center; padding: 20px"
+            >
+              No service records yet
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">🚗 Fleet Overview</span>
+    <div class="flex gap-2">
+      <a href="{% url 'reports' %}" class="btn btn-outline btn-sm"
+        >📄 Generate Report</a
+      >
+      {% if request.user.is_admin_role %}<a
+        href="{% url 'vehicle_add' %}"
+        class="btn btn-primary btn-sm"
+        >+ Add Vehicle</a
+      >{% endif %}
+    </div>
+  </div>
+  <div class="card-body">
+    {% if vehicles %}
+    <div class="vehicle-grid">
+      {% for v in vehicles %}
+      <a href="{% url 'vehicle_detail' v.pk %}" class="vehicle-card">
+        <div class="vehicle-plate">{{ v.vehicle_no }}</div>
+        <div class="vehicle-brand">{{ v.brand }} {{ v.model_name }}</div>
+        <div class="vehicle-meta">
+          <span class="vehicle-meta-item">📅 {{ v.manufacture_year }}</span>
+          <span class="vehicle-meta-item"
+            >⛽ {{ v.get_fuel_type_display }}</span
+          >
+          <span class="vehicle-meta-item"
+            >🚘 {{ v.get_vehicle_type_display }}</span
+          >
+        </div>
+        <div class="mt-1">
+          <span class="km-badge">📍 {{ v.current_km }} km</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 40px; color: var(--muted)">
+      <div style="font-size: 48px; margin-bottom: 12px">🚗</div>
+      <div style="font-family: var(--hf); font-size: 20px; margin-bottom: 8px">
+        No vehicles yet
+      </div>
+      {% if request.user.is_admin_role %}<a
+        href="{% url 'vehicle_add' %}"
+        class="btn btn-primary mt-1"
+        >Add Your First Vehicle</a
+      >{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
