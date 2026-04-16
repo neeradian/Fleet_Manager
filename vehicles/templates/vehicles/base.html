@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}FleetTrack Pro{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/fleet.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">🚛 FleetTrack</div>
+      <div class="sub">Vehicle Management</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Main</div>
+      <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <a href="{% url 'vehicle_list' %}" class="nav-link {% if 'vehicle' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="icon">🚗</span> Vehicles
+      </a>
+      <div class="nav-section">Records</div>
+      <a href="{% url 'service_list' %}" class="nav-link {% if request.resolver_match.url_name == 'service_list' %}active{% endif %}">
+        <span class="icon">🔧</span> Services
+      </a>
+      <a href="{% url 'fuel_list' %}" class="nav-link {% if request.resolver_match.url_name == 'fuel_list' %}active{% endif %}">
+        <span class="icon">⛽</span> Fuel Records
+      </a>
+      <a href="{% url 'reports' %}" class="nav-link {% if request.resolver_match.url_name == 'reports' %}active{% endif %}">
+        <span class="icon">📄</span> Reports
+      </a>
+      {% if request.user.is_admin_role %}
+      <div class="nav-section">Admin</div>
+      <a href="{% url 'user_list' %}" class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="icon">👥</span> Users
+      </a>
+      <a href="{% url 'vehicle_add' %}" class="nav-link">
+        <span class="icon">➕</span> Add Vehicle
+      </a>
+      {% endif %}
+    </nav>
+    <div class="sidebar-user">
+      <div class="uname">{{ request.user.get_full_name|default:request.user.username }}</div>
+      <div class="urole">
+        {% if request.user.is_admin_role %}
+          <span class="badge badge-yellow" style="font-size:10px;padding:1px 6px">Admin</span>
+        {% else %}
+          <span class="badge badge-gray" style="font-size:10px;padding:1px 6px">Staff</span>
+        {% endif %}
+      </div>
+      <a href="{% url 'logout' %}">↩ Sign Out</a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">{% block page_title %}Dashboard{% endblock %}</div>
+      <div class="flex gap-2 items-center">
+        <a href="{% url 'reports' %}" class="btn btn-outline btn-sm">📄 Reports</a>
+        {% if request.user.is_admin_role %}
+        <a href="{% url 'vehicle_add' %}" class="btn btn-primary btn-sm">+ Add Vehicle</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="content">
+      {% for message in messages %}
+      <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
+        {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% else %}⚠️{% endif %}
+        {{ message }}
+      </div>
+      {% endfor %}
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+<script src="{% static 'js/fleet.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
