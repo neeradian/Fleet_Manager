@@ -1,0 +1,151 @@
+{% extends 'vehicles/base.html' %}
+{% block title %}{{ title }} - FleetTrack{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">{{ title }}</div>
+    <div class="page-subtitle">
+      {{ vehicle.vehicle_no }} — {{ vehicle.brand }} {{ vehicle.model_name }}
+    </div>
+  </div>
+  <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-outline"
+    >← Back</a
+  >
+</div>
+<form method="post">
+  {% csrf_token %}
+  <div class="card mb-2">
+    <div class="card-header">
+      <span class="card-title">📅 Service Info</span>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Service Date *</label>{{ form.service_date }}
+          {% if form.service_date.errors %}
+          <ul class="errorlist">
+            {% for e in form.service_date.errors %}
+            <li>{{ e }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label>Odometer at Service *</label>{{ form.km_at_service }}
+        </div>
+        <div class="form-group">
+          <label>Service Center</label>{{ form.service_center }}
+        </div>
+        <div class="form-group">
+          <label>Total Cost (₹)</label>{{ form.total_cost }}
+        </div>
+        <div class="form-group">
+          <label>Next Service KM</label>{{ form.next_service_km }}
+        </div>
+        <div class="form-group">
+          <label>Next Service Date</label>{{ form.next_service_date }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card mb-2">
+    <div class="card-header">
+      <span class="card-title">🔧 Services Performed</span>
+    </div>
+    <div class="card-body">
+      <div style="margin-bottom: 14px">
+        <div
+          style="
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+          "
+        >
+          Oil &amp; Filters
+        </div>
+        <div class="checkbox-group">
+          <label class="checkbox-item"
+            >{{ form.engine_oil_changed }} Engine Oil Changed</label
+          >
+          <label class="checkbox-item"
+            >{{ form.oil_filter_changed }} Oil Filter Changed</label
+          >
+          <label class="checkbox-item"
+            >{{ form.air_filter_changed }} Air Filter Changed</label
+          >
+          <label class="checkbox-item"
+            >{{ form.fuel_filter_changed }} Fuel Filter Changed</label
+          >
+        </div>
+      </div>
+      <div style="margin-bottom: 14px">
+        <div
+          style="
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+          "
+        >
+          Grease &amp; Fluids
+        </div>
+        <div class="checkbox-group">
+          <label class="checkbox-item"
+            >{{ form.wheel_grease_applied }} Wheel Grease Applied</label
+          >
+          <label class="checkbox-item"
+            >{{ form.coolant_service_done }} Coolant Service Done</label
+          >
+          <label class="checkbox-item"
+            >{{ form.brake_fluid_changed }} Brake Fluid Changed</label
+          >
+          <label class="checkbox-item"
+            >{{ form.transmission_fluid_changed }} Transmission Fluid</label
+          >
+        </div>
+      </div>
+      <div>
+        <div
+          style="
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+          "
+        >
+          Other
+        </div>
+        <div class="checkbox-group">
+          <label class="checkbox-item"
+            >{{ form.brake_service }} Brake Service</label
+          >
+          <label class="checkbox-item"
+            >{{ form.battery_checked }} Battery Checked</label
+          >
+          <label class="checkbox-item">{{ form.ac_service }} AC Service</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card mb-2">
+    <div class="card-header"><span class="card-title">📝 Notes</span></div>
+    <div class="card-body">{{ form.notes }}</div>
+  </div>
+  <div class="flex gap-2">
+    <button type="submit" class="btn btn-primary">
+      💾 Save Service Record
+    </button>
+    <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-outline"
+      >Cancel</a
+    >
+  </div>
+</form>
+{% endblock %}
