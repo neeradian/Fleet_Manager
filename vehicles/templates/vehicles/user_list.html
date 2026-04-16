@@ -1,0 +1,85 @@
+{% extends 'vehicles/base.html' %} 
+{% block title %}Users - FleetTrack {% endblock %} 
+{% block page_title %}User Management{% endblock %} 
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Users</div>
+    <div class="page-subtitle">Admin &amp; Staff accounts</div>
+  </div>
+  <a href="{% url 'user_add' %}" class="btn btn-primary">+ Add User</a>
+</div>
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>
+            <strong>{{ u.username }}</strong>
+            {% if u == request.user %}
+                <span class="badge badge-blue" style="font-size: 10px">You</span>
+            {% endif %}
+          </td>
+          <td>{{ u.get_full_name|default:"—" }}</td>
+          <td class="text-muted">{{ u.email|default:"—" }}</td>
+          <td>
+            {% if u.is_admin_role %}
+                <span class="badge badge-yellow">Admin</span>
+            {% else %}
+                <span class="badge badge-gray">Staff</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if u.is_active %}
+                <span class="badge badge-green">Active</span> 
+            {% else %}
+                <span class="badge badge-red">Inactive</span>
+            {% endif %}
+          </td>
+          <td class="text-muted text-sm">{{ u.date_joined|date:"d M Y" }}</td>
+          <td>
+            <div class="flex gap-2">
+              <a
+                href="{% url 'user_edit' u.pk %}"
+                class="btn btn-outline btn-sm btn-icon"
+                >✏️</a
+              >
+              {% if u != request.user %}
+              <a
+                href="{% url 'user_delete' u.pk %}"
+                class="btn btn-outline btn-sm btn-icon"
+                style="color: var(--danger)"
+                >🗑</a
+              >
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td
+            colspan="7"
+            class="text-muted"
+            style="text-align: center; padding: 24px"
+          >
+            No users found.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'vehicles/base.html' %}
+{% block title %}Delete - FleetTrack{% endblock %}
+{% block page_title %}Confirm Delete{% endblock %}
+{% block content %}
+<div style="max-width: 460px; margin: 40px auto">
+  <div class="card">
+    <div class="card-body" style="text-align: center; padding: 40px">
+      <div style="font-size: 48px; margin-bottom: 14px">🗑️</div>
+      <div
+        style="
+          font-family: var(--hf);
+          font-size: 22px;
+          font-weight: 800;
+          margin-bottom: 8px;
+        "
+      >
+        Delete {{ type }}?
+      </div>
+      <div class="text-muted mb-2">
+        Are you sure you want to delete
+        <strong style="color: var(--text)">{{ object }}</strong>? This cannot beundone.
+      </div>
+      <form method="post" style="display: inline">
+        {% csrf_token %}
+        <div class="flex gap-2" style="justify-content: center">
+          <button type="submit" class="btn btn-danger">🗑 Yes, Delete</button>
+          <a href="javascript:history.back()" class="btn btn-outline">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
