@@ -117,8 +117,31 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Custom user model and auth settings
+# https://docs.djangoproject.com/en/4.2/topics/auth/customizing/#specifying-a-custom-user-model
+
+AUTH_USER_MODEL = 'vehicles.User'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login/'
+
+# Media files settings(Documents uploaded by users)
+# https://docs.djangoproject.com/en/4.2/topics/files/#configuring-file-uploads
+import os
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+
+# Max upload size: 10 MB
+# https://docs.djangoproject.com/en/4.2/ref/settings/#std:setting-FILE_UPLOAD_MAX_MEMORY_SIZE
+# This setting controls the maximum size (in bytes) that an uploaded file can be before it gets streamed to the file system instead of being kept in memory. Setting it to 10 MB (10485760 bytes) allows for reasonably large file uploads while preventing excessive memory usage.
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760
