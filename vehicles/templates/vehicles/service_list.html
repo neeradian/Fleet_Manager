@@ -1,0 +1,51 @@
+{% extends 'vehicles/base.html' %}
+{% block title %}Service Records — FleetTrack{% endblock %}
+{% block page_title %}Service Records{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="page-title">All Service Records</div><div class="page-subtitle">Total cost: ₹{{ total_cost|floatformat:2 }}</div></div>
+</div>
+<div class="card mb-2">
+  <div class="card-body" style="padding:12px 18px">
+    <form method="get" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
+      <div class="form-group" style="min-width:200px"><label>Vehicle</label>
+        <select name="vehicle"><option value="">All Vehicles</option>{% for v in vehicles %}<option value="{{ v.pk }}" {% if vehicle_filter == v.pk|stringformat:"s" %}selected{% endif %}>{{ v.vehicle_no }} — {{ v.brand }}</option>{% endfor %}</select>
+      </div>
+      <div class="form-group"><label>Date From</label><input type="date" name="date_from" value="{{ date_from }}"></div>
+      <div class="form-group"><label>Date To</label><input type="date" name="date_to" value="{{ date_to }}"></div>
+      <div class="flex gap-2" style="align-items:flex-end">
+        <button type="submit" class="btn btn-outline btn-sm">🔍 Filter</button>
+        <a href="{% url 'service_list' %}" class="btn btn-outline btn-sm">✕ Clear</a>
+        <a href="{% url 'reports' %}?report_type=service{% if vehicle_filter %}&vehicle={{ vehicle_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="btn btn-success btn-sm">📄 Report</a>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Vehicle</th><th>Date</th><th>KM</th><th>Engine Oil</th><th>Air Filter</th><th>Coolant</th><th>Wheel Grease</th><th>Brake Fluid</th><th>AC</th><th>Cost</th><th>Next Due</th><th>Created By</th><th>Updated By</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for s in records %}
+        <tr>
+          <td><a href="{% url 'vehicle_detail' s.vehicle.pk %}" style="color:var(--accent);font-weight:700;text-decoration:none;font-family:var(--hf);font-size:14px;letter-spacing:1px">{{ s.vehicle.vehicle_no }}</a></td>
+          <td>{{ s.service_date }}</td>
+          <td><span class="km-badge">{{ s.km_at_service }}</span></td>
+          <td>{% if s.engine_oil_changed %}<span class="badge badge-green">✓</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+          <td>{% if s.air_filter_changed %}<span class="badge badge-green">✓</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+          <td>{% if s.coolant_service_done %}<span class="badge badge-blue">✓</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+          <td>{% if s.wheel_grease_applied %}<span class="badge badge-yellow">✓</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+          <td>{% if s.brake_fluid_changed %}<span class="badge badge-green">✓</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+          <td>{% if s.ac_service %}<span class="badge badge-blue">✓</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+          <td>{% if s.total_cost %}<strong>₹{{ s.total_cost }}</strong>{% else %}—{% endif %}</td>
+          <td>{% if s.next_service_km %}<span class="text-sm">{{ s.next_service_km }} km</span>{% endif %}{% if s.next_service_date %}<br><span class="text-sm text-muted">{{ s.next_service_date }}</span>{% endif %}{% if not s.next_service_km and not s.next_service_date %}—{% endif %}</td>
+          <td class="audit-info">{{ s.created_by.username|default:"—" }}<br><span class="text-muted">{{ s.created_at|date:"d M y" }}</span></td>
+          <td class="audit-info">{% if s.updated_by %}{{ s.updated_by.username }}<br><span class="text-muted">{{ s.updated_at|date:"d M y" }}</span>{% else %}—{% endif %}</td>
+          <td><div class="flex gap-2"><a href="{% url 'service_edit' s.pk %}" class="btn btn-outline btn-sm btn-icon">✏️</a>{% if request.user.is_admin_role %}<a href="{% url 'service_delete' s.pk %}" class="btn btn-outline btn-sm btn-icon" style="color:var(--danger)">🗑</a>{% endif %}</div></td>
+        </tr>
+        {% empty %}<tr><td colspan="14" class="text-muted" style="text-align:center;padding:28px">No service records found.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
