@@ -76,7 +76,7 @@ class VehicleForm(forms.ModelForm):
             "fuel_type",
             "color",
             "current_km",
-            "owner_name",
+            "driver_name",
             "notes",
         ]
         widgets = {

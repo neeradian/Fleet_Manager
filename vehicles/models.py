@@ -84,7 +84,7 @@ class Vehicle(AuditMixin):
     fuel_type           = models.CharField(max_length=20, choices=FUEL_TYPE_CHOICES, default="petrol")
     color               = models.CharField(max_length=50, blank=True)
     current_km          = models.PositiveIntegerField(default=0)
-    owner_name          = models.CharField(max_length=150, blank=True)
+    driver_name         = models.CharField(max_length=150, blank=True)
     notes               = models.TextField(blank=True)
 
     class Meta:
