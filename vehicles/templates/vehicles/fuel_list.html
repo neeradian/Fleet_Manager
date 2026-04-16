@@ -1,0 +1,48 @@
+{% extends 'vehicles/base.html' %}
+{% block title %}Fuel Records — FleetTrack{% endblock %}
+{% block page_title %}Fuel Records{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="page-title">All Fuel Records</div><div class="page-subtitle">Total: ₹{{ total|floatformat:2 }} · {{ total_litres|floatformat:1 }} litres</div></div>
+</div>
+<div class="card mb-2">
+  <div class="card-body" style="padding:12px 18px">
+    <form method="get" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
+      <div class="form-group" style="min-width:200px"><label>Vehicle</label>
+        <select name="vehicle"><option value="">All Vehicles</option>{% for v in vehicles %}<option value="{{ v.pk }}" {% if vehicle_filter == v.pk|stringformat:"s" %}selected{% endif %}>{{ v.vehicle_no }} — {{ v.brand }}</option>{% endfor %}</select>
+      </div>
+      <div class="form-group"><label>Date From</label><input type="date" name="date_from" value="{{ date_from }}"></div>
+      <div class="form-group"><label>Date To</label><input type="date" name="date_to" value="{{ date_to }}"></div>
+      <div class="flex gap-2" style="align-items:flex-end">
+        <button type="submit" class="btn btn-outline btn-sm">🔍 Filter</button>
+        <a href="{% url 'fuel_list' %}" class="btn btn-outline btn-sm">✕ Clear</a>
+        <a href="{% url 'reports' %}?report_type=fuel{% if vehicle_filter %}&vehicle={{ vehicle_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="btn btn-success btn-sm">📄 Report</a>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Vehicle</th><th>Date</th><th>KM</th><th>Litres</th><th>₹/Litre</th><th>Total</th><th>Mileage</th><th>Station</th><th>Created By</th><th>Updated By</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for f in records %}
+        <tr>
+          <td><a href="{% url 'vehicle_detail' f.vehicle.pk %}" style="color:var(--accent);font-weight:700;text-decoration:none;font-family:var(--hf);font-size:14px;letter-spacing:1px">{{ f.vehicle.vehicle_no }}</a></td>
+          <td>{{ f.fill_date }}</td>
+          <td><span class="km-badge">{{ f.km_at_fill }}</span></td>
+          <td>{{ f.litres_filled }}L</td>
+          <td>₹{{ f.price_per_litre }}</td>
+          <td><strong>₹{{ f.total_amount }}</strong></td>
+          <td>{% if f.mileage %}<strong style="color:var(--success)">{{ f.mileage }}</strong> <span class="text-muted text-sm">km/L</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+          <td class="text-muted text-sm">{{ f.fuel_station|default:"—" }}</td>
+          <td class="audit-info">{{ f.created_by.username|default:"—" }}<br><span class="text-muted">{{ f.created_at|date:"d M y" }}</span></td>
+          <td class="audit-info">{% if f.updated_by %}{{ f.updated_by.username }}<br><span class="text-muted">{{ f.updated_at|date:"d M y" }}</span>{% else %}—{% endif %}</td>
+          <td><div class="flex gap-2"><a href="{% url 'fuel_edit' f.pk %}" class="btn btn-outline btn-sm btn-icon">✏️</a>{% if request.user.is_admin_role %}<a href="{% url 'fuel_delete' f.pk %}" class="btn btn-outline btn-sm btn-icon" style="color:var(--danger)">🗑</a>{% endif %}</div></td>
+        </tr>
+        {% empty %}<tr><td colspan="11" class="text-muted" style="text-align:center;padding:28px">No fuel records found.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

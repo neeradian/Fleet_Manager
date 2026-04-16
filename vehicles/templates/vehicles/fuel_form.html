@@ -1,0 +1,167 @@
+{% extends 'vehicles/base.html' %}
+{% block title %}{{ title }} - FleetTrack{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">{{ title }}</div>
+    <div class="page-subtitle">
+      {{ vehicle.vehicle_no }} — {{ vehicle.brand }} {{ vehicle.model_name }}
+    </div>
+  </div>
+  <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-outline"
+    >← Back</a
+  >
+</div>
+<div
+  style="
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 18px;
+    align-items: start;
+  "
+>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">⛽ Fuel Details</span>
+    </div>
+    <div class="card-body">
+      <form method="post" id="fuelForm">
+        {% csrf_token %}
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Fill Date *</label>{{ form.fill_date }}
+            {% if form.fill_date.errors %}
+            <ul class="errorlist">
+              {% for e in form.fill_date.errors %}
+              <li>{{ e }}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label>Odometer at Fill (km) *</label>{{ form.km_at_fill }}
+          </div>
+          <div class="form-group">
+            <label>Litres Filled *</label>{{ form.litres_filled }}<span
+              class="text-sm text-muted"
+              >Total amount auto-calculated</span
+            >
+          </div>
+          <div class="form-group">
+            <label>Price per Litre (₹) *</label>{{ form.price_per_litre }}<span
+              class="text-sm text-muted"
+              >Mileage computed from prev. fill</span
+            >
+          </div>
+          <div class="form-group">
+            <label>Fuel Station</label>{{ form.fuel_station }}
+          </div>
+          <div class="form-group">
+            <label>Station Type</label>{{ form.station_type }}
+          </div>
+          <div class="form-group full">
+            <label>Notes</label>{{ form.notes }}
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            💾 Save Fuel Record
+          </button>
+          <a
+            href="{% url 'vehicle_detail' vehicle.pk %}"
+            class="btn btn-outline"
+            >Cancel</a
+          >
+        </div>
+      </form>
+    </div>
+  </div>
+  <div style="position: sticky; top: 64px">
+    <div class="card">
+      <div class="card-header"><span class="card-title">🧮 Preview</span></div>
+      <div class="card-body">
+        <div style="margin-bottom: 14px">
+          <div
+            class="text-sm text-muted"
+            style="
+              font-size: 10px;
+              letter-spacing: 2px;
+              text-transform: uppercase;
+              font-weight: 600;
+              margin-bottom: 4px;
+            "
+          >
+            Total Amount
+          </div>
+          <div
+            id="preview-total"
+            style="
+              font-family: var(--hf);
+              font-size: 34px;
+              font-weight: 800;
+              color: var(--accent);
+            "
+          >
+            ₹ 0.00
+          </div>
+          <div class="text-sm text-muted">Litres × ₹/Litre</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 12.5px; color: var(--muted); line-height: 1.7">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              padding: 3px 0;
+              border-bottom: 1px solid var(--border);
+            "
+          >
+            <span>Current odometer</span
+            ><span style="color: var(--text); font-weight: 600"
+              >{{ vehicle.current_km }} km</span
+            >
+          </div>
+          {% if fuel %}
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              padding: 3px 0;
+              border-bottom: 1px solid var(--border);
+            "
+          >
+            <span>Saved total</span
+            ><span style="color: var(--accent); font-weight: 600"
+              >₹{{ fuel.total_amount }}</span
+            >
+          </div>
+          {% if fuel.mileage %}
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              padding: 3px 0;
+            "
+          >
+            <span>Saved mileage</span
+            ><span style="color: var(--success); font-weight: 600"
+              >{{ fuel.mileage }} km/L</span
+            >
+          </div>
+          {% endif %} {% endif %}
+        </div>
+        <div class="divider"></div>
+        <div
+          class="text-sm text-muted"
+          style="line-height: 1.5; font-size: 11.5px"
+        >
+          ℹ️ Mileage is calculated after saving using the previous fill's
+          odometer.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
