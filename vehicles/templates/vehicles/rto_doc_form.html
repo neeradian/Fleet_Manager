@@ -1,0 +1,159 @@
+{% extends 'vehicles/base.html' %}
+{% block title %}Upload RTO Document — FleetTrack{% endblock %}
+{% block page_title %}Upload Document{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Upload RTO Document</div>
+    <div class="page-subtitle">
+      {{ vehicle.vehicle_no }} — {{ vehicle.brand }} {{ vehicle.model_name }}
+    </div>
+  </div>
+  <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-outline"
+    >← Back</a
+  >
+</div>
+
+<div
+  style="
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+    align-items: start;
+  "
+>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">📎 Document Details</span>
+    </div>
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Document Type *</label>
+            {{ form.doc_type }} {% if form.doc_type.errors %}
+                <ul class="errorlist">
+                {% for e in form.doc_type.errors %}
+                    <li>{{ e }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label>Title *</label>
+            {{ form.title }} {% if form.title.errors %}
+            <ul class="errorlist">
+              {% for e in form.title.errors %}
+              <li>{{ e }}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label>Valid Upto (optional)</label>
+            {{ form.valid_upto }}
+          </div>
+          <div class="form-group full">
+            <label>File *</label>
+            <div class="upload-zone" id="uploadZone">
+              <span class="upload-icon">📁</span>
+              <p><strong>Click to browse</strong> or drag & drop</p>
+              <p style="margin-top: 6px; font-size: 12px">
+                Supports: PDF, JPG, PNG, JPEG, WEBP
+              </p>
+              <p class="file-chosen text-muted text-sm mt-1">No file chosen</p>
+            </div>
+            <div style="display: none">{{ form.file }}</div>
+            {% if form.file.errors %}
+            <ul class="errorlist">
+              {% for e in form.file.errors %}
+              <li>{{ e }}</li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+          <div class="form-group full">
+            <label>Notes</label>
+            {{ form.notes }}
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            📤 Upload Document
+          </button>
+          <a
+            href="{% url 'vehicle_detail' vehicle.pk %}"
+            class="btn btn-outline"
+            >Cancel</a
+          >
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div style="position: sticky; top: 64px">
+    <div class="card mb-2">
+      <div class="card-header"><span class="card-title">ℹ️ Tips</span></div>
+      <div
+        class="card-body"
+        style="font-size: 13px; color: var(--muted); line-height: 1.8"
+      >
+        <p>
+          📄 <strong style="color: var(--text)">RC Book</strong> — Upload as PDF
+          or image
+        </p>
+        <p>
+          🛡️ <strong style="color: var(--text)">Insurance</strong> — Policy
+          document or soft copy
+        </p>
+        <p>
+          🌿 <strong style="color: var(--text)">Pollution</strong> — PUC
+          certificate
+        </p>
+        <p>
+          ✅ <strong style="color: var(--text)">Fitness</strong> — Annual
+          fitness certificate
+        </p>
+        <div class="divider"></div>
+        <p>
+          Max file size: <strong style="color: var(--text)">10 MB</strong
+          ><br />Accepted: PDF, JPG, PNG, WEBP
+        </p>
+      </div>
+    </div>
+    {% if rto.documents.count %}
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📂 Existing ({{ rto.documents.count }})</span>
+      </div>
+      <div class="card-body" style="padding: 12px">
+        {% for doc in rto.documents.all %}
+        <div
+          style="
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 12.5px;
+          "
+        >
+          <span
+            >{% if doc.is_pdf %}
+                📄
+            {% elif doc.is_image %}
+                🖼️
+            {% else %}
+                📁
+            {% endif %} {{ doc.title }}</span
+          >
+          <span class="badge badge-gray" style="float: right; font-size: 10px"
+            >{{ doc.get_doc_type_display }}</span
+          >
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

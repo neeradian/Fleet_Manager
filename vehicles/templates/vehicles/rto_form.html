@@ -1,0 +1,82 @@
+{% extends 'vehicles/base.html' %}
+{% block title %}RTO Details — FleetTrack{% endblock %}
+{% block page_title %}RTO Details{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">RTO Details</div>
+    <div class="page-subtitle">
+      {{ vehicle.vehicle_no }} — {{ vehicle.brand }} {{ vehicle.model_name }}
+    </div>
+  </div>
+  <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-outline"
+    >← Back</a
+  >
+</div>
+<div class="card" style="max-width: 900px">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="form-group">
+          <label>RTO Office *</label>{{ form.rto_office }}
+          {% if form.rto_office.errors %}
+            <ul class="errorlist">
+                {% for e in form.rto_office.errors %}
+                <li>{{ e }}</li>
+                {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        <div class="form-group"><label>RTO Code</label>{{ form.rto_code }}</div>
+        <div class="form-group">
+          <label>Registration Date *</label>{{ form.registration_date }}
+        </div>
+        <div class="form-group">
+          <label>Registration Valid Upto</label>{{ form.registration_valid_upto }}
+        </div>
+        <div class="form-group">
+          <label>Fitness Certificate Date</label>{{ form.fitness_certificate_date }}
+        </div>
+        <div class="form-group">
+          <label>Fitness Valid Upto</label>{{ form.fitness_valid_upto }}
+        </div>
+        <div class="form-group">
+          <label>Insurance Company</label>{{ form.insurance_company }}
+        </div>
+        <div class="form-group">
+          <label>Insurance Policy No.</label>{{ form.insurance_policy_no }}
+        </div>
+        <div class="form-group">
+          <label>Insurance Valid Upto</label>{{ form.insurance_valid_upto }}
+        </div>
+        <div class="form-group">
+          <label>Permit No.</label>{{ form.permit_no }}
+        </div>
+        <div class="form-group">
+          <label>Permit Valid Upto</label>{{ form.permit_valid_upto }}
+        </div>
+        <div class="form-group">
+          <label>Pollution Cert. No.</label>{{ form.pollution_certificate_no }}
+        </div>
+        <div class="form-group">
+          <label>Pollution Valid Upto</label>{{ form.pollution_valid_upto }}
+        </div>
+        <div class="form-group">
+          <label>Tax Paid Upto</label>{{ form.tax_paid_upto }}
+        </div>
+        <div class="form-group full"><label>Notes</label>{{ form.notes }}</div>
+      </div>
+      <div class="divider"></div>
+      <div class="flex gap-2">
+        <button type="submit" class="btn btn-primary">
+          💾 Save RTO Details
+        </button>
+        <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-outline"
+          >Cancel</a
+        >
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
