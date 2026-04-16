@@ -1,0 +1,104 @@
+{% extends 'vehicles/base.html' %} {% block title %}{{ title }} - FleetTrack{%
+endblock %} {% block page_title %}{{ title }}{% endblock %} {% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">{{ title }}</div>
+    {% if vehicle %}
+        <div class="page-subtitle">{{ vehicle.vehicle_no }}</div>
+    {% endif %}
+  </div>
+  <a
+    href="{% if vehicle %}{% url 'vehicle_detail' vehicle.pk %}{% else %}{% url 'vehicle_list' %}{% endif %}"
+    class="btn btn-outline"
+    >← Back</a
+  >
+</div>
+<form method="post">
+  {% csrf_token %}
+  <div class="card mb-2">
+    <div class="card-header"><span class="card-title">🔑 Identity</span></div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Vehicle Number *</label>{{ form.vehicle_no }}
+          {% if form.vehicle_no.errors %}
+            <ul class="errorlist">
+                {% for e in form.vehicle_no.errors %}
+                <li>{{ e }}</li>
+                {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label>Registration Number *</label>{{ form.registration_no }}
+          {% if form.registration_no.errors %}
+            <ul class="errorlist">
+                {% for e in form.registration_no.errors %}
+                <li>{{ e }}</li>
+                {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label>Chassis Number *</label>{{ form.chassis_no }}
+          {% if form.chassis_no.errors %}
+            <ul class="errorlist">
+                {% for e in form.chassis_no.errors %}
+                <li>{{ e }}</li>
+                {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label>Engine Number *</label>{{ form.engine_no }}
+          {% if form.engine_no.errors %}
+            <ul class="errorlist">
+                {% for e in form.engine_no.errors %}
+                <li>{{ e }}</li>
+                {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card mb-2">
+    <div class="card-header">
+      <span class="card-title">🚗 Vehicle Info</span>
+    </div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Brand *</label>{{ form.brand }}</div>
+        <div class="form-group">
+          <label>Model Name</label>{{ form.model_name }}
+        </div>
+        <div class="form-group">
+          <label>Manufacture Year *</label>{{ form.manufacture_year }}
+        </div>
+        <div class="form-group">
+          <label>Vehicle Type</label>{{ form.vehicle_type }}
+        </div>
+        <div class="form-group">
+          <label>Fuel Type</label>{{ form.fuel_type }}
+        </div>
+        <div class="form-group"><label>Color</label>{{ form.color }}</div>
+        <div class="form-group">
+          <label>Current Odometer (km)</label>{{ form.current_km }}
+        </div>
+        <div class="form-group">
+          <label>Owner Name</label>{{ form.owner_name }}
+        </div>
+        <div class="form-group full"><label>Notes</label>{{ form.notes }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="flex gap-2">
+    <button type="submit" class="btn btn-primary">💾 Save Vehicle</button>
+    <a
+      href="{% if vehicle %}{% url 'vehicle_detail' vehicle.pk %}{% else %}{% url 'vehicle_list' %}{% endif %}"
+      class="btn btn-outline"
+      >Cancel</a
+    >
+  </div>
+</form>
+{% endblock %}

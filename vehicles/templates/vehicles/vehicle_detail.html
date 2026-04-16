@@ -1,0 +1,562 @@
+{% extends 'vehicles/base.html' %}
+{% block title %}{{ vehicle.vehicle_no }} — FleetTrack{% endblock %}
+{% block page_title %}{{ vehicle.vehicle_no }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">{{ vehicle.vehicle_no }}</div>
+    <div class="page-subtitle">
+      {{ vehicle.brand }} {{ vehicle.model_name }} · {{ vehicle.manufacture_year}}
+    </div>
+  </div>
+  <div class="flex gap-2">
+    <a
+      href="{% url 'reports' %}?report_type=combined&vehicle={{ vehicle.pk }}"
+      class="btn btn-outline"
+      >📄 Report</a
+    >
+    <a href="{% url 'vehicle_edit' vehicle.pk %}" class="btn btn-outline"
+      >✏️ Edit</a
+    >
+    {% if request.user.is_admin_role %}
+    <a
+      href="{% url 'vehicle_delete' vehicle.pk %}"
+      class="btn btn-outline"
+      style="border-color: rgba(239, 68, 68, 0.3); color: var(--danger)"
+      >🗑 Delete</a
+    >
+    {% endif %}
+  </div>
+</div>
+
+<!-- Info + RTO -->
+<div class="grid-2 mb-2">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🚗 Vehicle Details</span>
+    </div>
+    <div class="card-body">
+      <table style="width: 100%; font-size: 13.5px">
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0; width: 155px">
+            Vehicle No.
+          </td>
+          <td
+            style="
+              font-weight: 700;
+              color: var(--accent);
+              font-family: var(--hf);
+              font-size: 18px;
+              letter-spacing: 2px;
+            "
+          >
+            {{ vehicle.vehicle_no }}
+          </td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Registration</td>
+          <td>{{ vehicle.registration_no }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Chassis No.</td>
+          <td style="font-family: monospace; font-size: 12px">
+            {{ vehicle.chassis_no }}
+          </td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Engine No.</td>
+          <td style="font-family: monospace; font-size: 12px">
+            {{ vehicle.engine_no }}
+          </td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Brand / Model</td>
+          <td>{{ vehicle.brand }} {{ vehicle.model_name }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Year</td>
+          <td>{{ vehicle.manufacture_year }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Type</td>
+          <td>
+            <span class="badge badge-blue"
+              >{{ vehicle.get_vehicle_type_display }}</span
+            >
+          </td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Fuel</td>
+          <td>
+            <span class="badge badge-yellow"
+              >{{ vehicle.get_fuel_type_display }}</span
+            >
+          </td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Color</td>
+          <td>{{ vehicle.color|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Driver</td>
+          <td>{{ vehicle.driver_name|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Odometer</td>
+          <td><span class="km-badge">{{ vehicle.current_km }} km</span></td>
+        </tr>
+      </table>
+      <div class="divider"></div>
+      <div class="audit-info">
+        Added by
+        <strong>{{ vehicle.created_by.username|default:"—" }}</strong> on
+        {{ vehicle.created_at|date:"d M Y H:i" }}
+        {% if vehicle.updated_by %}
+            <br />Updated by <strong>{{ vehicle.updated_by.username }}</strong> on {{ vehicle.updated_at|date:"d M Y H:i" }}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">📋 RTO Details</span>
+      <div class="flex gap-2">
+        <a
+          href="{% url 'rto_add_edit' vehicle.pk %}"
+          class="btn btn-outline btn-sm"
+          >{% if rto %}✏️ Edit{% else %}+ Add{% endif %}</a
+        >
+        {% if rto %}<a
+          href="{% url 'rto_doc_add' vehicle.pk %}"
+          class="btn btn-primary btn-sm"
+          >📎 Upload Doc</a
+        >{% endif %}
+      </div>
+    </div>
+    <div class="card-body">
+      {% if rto %}
+      <table style="width: 100%; font-size: 13.5px">
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0; width: 170px">
+            RTO Office
+          </td>
+          <td>{{ rto.rto_office }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">RTO Code</td>
+          <td>{{ rto.rto_code|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Reg. Date</td>
+          <td>{{ rto.registration_date }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Reg. Valid Upto</td>
+          <td>{{ rto.registration_valid_upto|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Fitness Valid</td>
+          <td>{{ rto.fitness_valid_upto|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Insurance Co.</td>
+          <td>{{ rto.insurance_company|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Policy No.</td>
+          <td>{{ rto.insurance_policy_no|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Insurance Valid</td>
+          <td>
+            {% if rto.insurance_valid_upto %}<span
+              class="badge {% if rto.insurance_valid_upto < today %}badge-red{% else %}badge-green{% endif %}"
+              >{{ rto.insurance_valid_upto }}</span
+            >{% else %}—{% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Pollution Valid</td>
+          <td>
+            {% if rto.pollution_valid_upto %}<span
+              class="badge {% if rto.pollution_valid_upto < today %}badge-red{% else %}badge-green{% endif %}"
+              >{{ rto.pollution_valid_upto }}</span
+            >{% else %}—{% endif %}
+          </td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Permit No.</td>
+          <td>{{ rto.permit_no|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Permit Valid</td>
+          <td>{{ rto.permit_valid_upto|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td style="color: var(--muted); padding: 5px 0">Tax Paid Upto</td>
+          <td>{{ rto.tax_paid_upto|default:"—" }}</td>
+        </tr>
+      </table>
+      {% else %}
+      <div style="text-align: center; padding: 28px; color: var(--muted)">
+        No RTO details yet.<br /><a
+          href="{% url 'rto_add_edit' vehicle.pk %}"
+          class="btn btn-primary mt-2"
+          >+ Add RTO Details</a
+        >
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- RTO Documents -->
+{% if rto %}
+<div class="card mb-2">
+  <div class="card-header">
+    <span class="card-title">📎 RTO Documents ({{ rto_docs|length }})</span>
+    <a href="{% url 'rto_doc_add' vehicle.pk %}" class="btn btn-primary btn-sm"
+      >+ Upload Document</a
+    >
+  </div>
+  <div class="card-body">
+    {% if rto_docs %}
+    <div class="doc-grid">
+      {% for doc in rto_docs %}
+      <div class="doc-card">
+        <div class="doc-icon">
+          {% if doc.is_pdf %}📄{% elif doc.is_image %}🖼️{% else %}📁{% endif %}
+        </div>
+        <div class="doc-title">{{ doc.title }}</div>
+        <div class="doc-meta">
+          <span class="badge badge-blue" style="margin-bottom: 4px"
+            >{{ doc.get_doc_type_display }}</span
+          ><br />
+          {% if doc.valid_upto %}
+          <span
+            class="{% if doc.valid_upto < today %}text-danger{% else %}text-muted{% endif %}"
+            >Valid: {{ doc.valid_upto }}</span
+          ><br />
+          {% endif %}
+          <span class="text-muted" style="font-size: 10px"
+            >{{ doc.filename }}</span
+          >
+        </div>
+        <div class="doc-actions">
+          <a
+            href="{{ doc.file.url }}"
+            target="_blank"
+            class="btn btn-outline btn-sm"
+            style="flex: 1; justify-content: center"
+            >👁 View</a
+          >
+          <a href="{{ doc.file.url }}" download class="btn btn-outline btn-sm"
+            >⬇</a
+          >
+          {% if request.user.is_admin_role %}
+          <a
+            href="{% url 'rto_doc_delete' doc.pk %}"
+            class="btn btn-outline btn-sm"
+            style="color: var(--danger)"
+            >🗑</a
+          >
+          {% endif %}
+        </div>
+        <div class="audit-info">
+          {{ doc.created_by.username|default:"—" }} · {{ doc.created_at|date:"d M y" }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 24px; color: var(--muted)">
+      No documents uploaded yet.
+      <a href="{% url 'rto_doc_add' vehicle.pk %}" class="text-accent"
+        >Upload one →</a
+      >
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Stats -->
+<div class="stats-grid mb-2" style="grid-template-columns: repeat(3, 1fr)">
+  <div class="stat-card blue">
+    <div class="stat-label">Total Fuel Spent</div>
+    <div class="stat-value" style="font-size: 22px">
+      ₹{{ total_fuel|floatformat:0 }}
+    </div>
+    <div class="stat-sub">{{ total_litres|floatformat:1 }} litres</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-label">Service Cost</div>
+    <div class="stat-value" style="font-size: 22px">
+      ₹{{ total_service_cost|floatformat:0 }}
+    </div>
+    <div class="stat-sub">{{ service_records.count }} services</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Tyre Changes</div>
+    <div class="stat-value">{{ tyre_records.count }}</div>
+    <div class="stat-sub">Total records</div>
+  </div>
+</div>
+
+<!-- Service Records -->
+<div class="card mb-2">
+  <div class="card-header">
+    <span class="card-title">🔧 Service Records</span>
+    <a href="{% url 'service_add' vehicle.pk %}" class="btn btn-primary btn-sm"
+      >+ Add Service</a
+    >
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>KM</th>
+          <th>Engine Oil</th>
+          <th>Air Filter</th>
+          <th>Coolant</th>
+          <th>Wheel Grease</th>
+          <th>Cost</th>
+          <th>Next Due</th>
+          <th>By</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in service_records %}
+        <tr>
+          <td>{{ s.service_date }}</td>
+          <td><span class="km-badge">{{ s.km_at_service }}</span></td>
+          <td>
+            {% if s.engine_oil_changed %}<span class="badge badge-green">✓</span
+            >{% else %}<span class="text-muted">—</span>{% endif %}
+          </td>
+          <td>
+            {% if s.air_filter_changed %}<span class="badge badge-green">✓</span
+            >{% else %}<span class="text-muted">—</span>{% endif %}
+          </td>
+          <td>
+            {% if s.coolant_service_done %}<span class="badge badge-blue"
+              >✓</span
+            >{% else %}<span class="text-muted">—</span>{% endif %}
+          </td>
+          <td>
+            {% if s.wheel_grease_applied %}<span class="badge badge-yellow"
+              >✓</span
+            >{% else %}<span class="text-muted">—</span>{% endif %}
+          </td>
+          <td>
+            {% if s.total_cost %}₹{{ s.total_cost }}{% else %}—{% endif %}
+          </td>
+          <td>
+            {% if s.next_service_km %}<span class="text-sm"
+              >{{ s.next_service_km }} km</span
+            >{% endif %}{% if s.next_service_date %}<br /><span
+              class="text-sm text-muted"
+              >{{ s.next_service_date }}</span
+            >{% endif %}{% if not s.next_service_km and not s.next_service_date %}—{% endif %}
+          </td>
+          <td class="audit-info">
+            {{ s.created_by.username|default:"—" }}<br /><span
+              class="text-muted"
+              >{{ s.created_at|date:"d M y" }}</span
+            >
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <a
+                href="{% url 'service_edit' s.pk %}"
+                class="btn btn-outline btn-sm btn-icon"
+                >✏️</a
+              >{% if request.user.is_admin_role %}<a
+                href="{% url 'service_delete' s.pk %}"
+                class="btn btn-outline btn-sm btn-icon"
+                style="color: var(--danger)"
+                >🗑</a
+              >{% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td
+            colspan="10"
+            class="text-muted"
+            style="text-align: center; padding: 20px"
+          >
+            No service records.
+            <a href="{% url 'service_add' vehicle.pk %}" class="text-accent"
+              >Add one →</a
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Tyre Records -->
+<div class="card mb-2">
+  <div class="card-header">
+    <span class="card-title">🔄 Tyre Records</span>
+    <a href="{% url 'tyre_add' vehicle.pk %}" class="btn btn-primary btn-sm"
+      >+ Add Tyre</a
+    >
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>KM</th>
+          <th>Position</th>
+          <th>Brand</th>
+          <th>Size</th>
+          <th>KM Used</th>
+          <th>Cost</th>
+          <th>By</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tyre_records %}
+        <tr>
+          <td>{{ t.changed_date }}</td>
+          <td><span class="km-badge">{{ t.km_at_change }}</span></td>
+          <td>
+            <span class="badge badge-blue"
+              >{{ t.get_tyre_position_display }}</span
+            >
+          </td>
+          <td>{{ t.tyre_brand|default:"—" }}</td>
+          <td>{{ t.tyre_size|default:"—" }}</td>
+          <td>{% if t.km_used %}{{ t.km_used }} km{% else %}—{% endif %}</td>
+          <td>{% if t.cost %}₹{{ t.cost }}{% else %}—{% endif %}</td>
+          <td class="audit-info">
+            {{ t.created_by.username|default:"—" }}<br /><span
+              class="text-muted"
+              >{{ t.created_at|date:"d M y" }}</span
+            >
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <a
+                href="{% url 'tyre_edit' t.pk %}"
+                class="btn btn-outline btn-sm btn-icon"
+                >✏️</a
+              >{% if request.user.is_admin_role %}<a
+                href="{% url 'tyre_delete' t.pk %}"
+                class="btn btn-outline btn-sm btn-icon"
+                style="color: var(--danger)"
+                >🗑</a
+              >{% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td
+            colspan="9"
+            class="text-muted"
+            style="text-align: center; padding: 20px"
+          >
+            No tyre records.
+            <a href="{% url 'tyre_add' vehicle.pk %}" class="text-accent"
+              >Add one →</a
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Fuel Records -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">⛽ Fuel Records</span>
+    <a href="{% url 'fuel_add' vehicle.pk %}" class="btn btn-primary btn-sm"
+      >+ Add Fuel</a
+    >
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>KM</th>
+          <th>Litres</th>
+          <th>₹/Litre</th>
+          <th>Total</th>
+          <th>Mileage</th>
+          <th>Station</th>
+          <th>By</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in fuel_records %}
+        <tr>
+          <td>{{ f.fill_date }}</td>
+          <td><span class="km-badge">{{ f.km_at_fill }}</span></td>
+          <td>{{ f.litres_filled }}L</td>
+          <td>₹{{ f.price_per_litre }}</td>
+          <td><strong>₹{{ f.total_amount }}</strong></td>
+          <td>
+            {% if f.mileage %}<strong style="color: var(--success)"
+              >{{ f.mileage }}</strong
+            >
+            <span class="text-muted text-sm">km/L</span>{% else %}<span
+              class="text-muted"
+              >—</span
+            >{% endif %}
+          </td>
+          <td class="text-muted text-sm">{{ f.fuel_station|default:"—" }}</td>
+          <td class="audit-info">
+            {{ f.created_by.username|default:"—" }}<br /><span
+              class="text-muted"
+              >{{ f.created_at|date:"d M y" }}</span
+            >
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <a
+                href="{% url 'fuel_edit' f.pk %}"
+                class="btn btn-outline btn-sm btn-icon"
+                >✏️</a
+              >{% if request.user.is_admin_role %}<a
+                href="{% url 'fuel_delete' f.pk %}"
+                class="btn btn-outline btn-sm btn-icon"
+                style="color: var(--danger)"
+                >🗑</a
+              >{% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td
+            colspan="9"
+            class="text-muted"
+            style="text-align: center; padding: 20px"
+          >
+            No fuel records.
+            <a href="{% url 'fuel_add' vehicle.pk %}" class="text-accent"
+              >Add one →</a
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'vehicles/base.html' %}
+{% block title %}Vehicles - FleetTrack{% endblock %}
+{% block page_title %}Vehicles{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">All Vehicles</div>
+    <div class="page-subtitle">Manage your entire fleet</div>
+  </div>
+  {% if request.user.is_admin_role %}<a
+    href="{% url 'vehicle_add' %}"
+    class="btn btn-primary"
+    >+ Add Vehicle</a
+  >{% endif %}
+</div>
+<div class="card mb-2">
+  <div class="card-body" style="padding: 12px 18px">
+    <form method="get" style="display: flex; gap: 10px; align-items: center">
+      <input
+        type="text"
+        name="q"
+        value="{{ q }}"
+        placeholder="Search vehicle no, brand, registration, owner..."
+        style="flex: 1; max-width: 420px"
+      />
+      <button type="submit" class="btn btn-outline btn-sm">🔍 Search</button>
+      {% if q %}<a
+        href="{% url 'vehicle_list' %}"
+        class="btn btn-outline btn-sm"
+        >✕ Clear</a
+      >{% endif %}
+    </form>
+  </div>
+</div>
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Vehicle No.</th>
+          <th>Brand / Model</th>
+          <th>Type</th>
+          <th>Year</th>
+          <th>Fuel</th>
+          <th>Odometer</th>
+          <th>Owner</th>
+          <th>Added By</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in vehicles %}
+        <tr>
+          <td>
+            <a
+              href="{% url 'vehicle_detail' v.pk %}"
+              style="
+                color: var(--accent);
+                font-weight: 700;
+                font-family: var(--hf);
+                font-size: 16px;
+                letter-spacing: 1px;
+                text-decoration: none;
+              "
+              >{{ v.vehicle_no }}</a
+            >
+          </td>
+          <td>
+            <div style="font-weight: 600">{{ v.brand }}</div>
+            <div class="text-sm text-muted">{{ v.model_name }}</div>
+          </td>
+          <td>
+            <span class="badge badge-blue"
+              >{{ v.get_vehicle_type_display }}</span
+            >
+          </td>
+          <td>{{ v.manufacture_year }}</td>
+          <td>
+            <span class="badge badge-gray">{{ v.get_fuel_type_display }}</span>
+          </td>
+          <td><span class="km-badge">{{ v.current_km }} km</span></td>
+          <td class="text-muted">{{ v.owner_name|default:"—" }}</td>
+          <td class="audit-info">
+            {{ v.created_by.username|default:"—" }}<br /><span
+              class="text-muted"
+              >{{ v.created_at|date:"d M y" }}</span
+            >
+          </td>
+          <td>
+            <div class="flex gap-2">
+              <a
+                href="{% url 'vehicle_detail' v.pk %}"
+                class="btn btn-outline btn-sm btn-icon"
+                >👁</a
+              >
+              <a
+                href="{% url 'vehicle_edit' v.pk %}"
+                class="btn btn-outline btn-sm btn-icon"
+                >✏️</a
+              >
+              {% if request.user.is_admin_role %}<a
+                href="{% url 'vehicle_delete' v.pk %}"
+                class="btn btn-outline btn-sm btn-icon"
+                style="color: var(--danger)"
+                >🗑</a
+              >{% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td
+            colspan="9"
+            style="text-align: center; padding: 40px; color: var(--muted)"
+          >
+            {% if q %}No vehicles match your search.{% else %}No vehicles added
+            yet.{% if request.user.is_admin_role %}
+            <a href="{% url 'vehicle_add' %}" class="text-accent"
+              >Add one now →</a
+            >{% endif %}{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
