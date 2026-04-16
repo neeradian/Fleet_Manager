@@ -19,6 +19,9 @@ media/
 # Ignore environment variable files
 .env
 
+# Ignore migrations
+*/migrations/
+
 
 # Ignore IDE specific files
 .vscode/
