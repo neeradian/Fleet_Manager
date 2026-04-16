@@ -7,14 +7,21 @@ A full-featured Django web application for managing your vehicle fleet including
 
 ## 🚀 Quick Setup
 
-### 1. Create a Virtual Environment
-
+### 1. Clone the repository
 ```bash
-# Using venv
-python -m venv venv
+git clone https://github.com/neeradian/Fleet_Manager.git
+
+cd Fleet_Manager
 ```
 
-### 2. Activate virtual environment
+### 2. Create a Virtual Environment
+
+Using venv
+```bash
+python -m venv .venv
+```
+
+### 3. Activate virtual environment
 
 ####  On Windows:
 ```bash
@@ -32,22 +39,9 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
 
-### 3. Clone the repository
-```bash
-git clone https://github.com/neeradian/Fleet_Manager.git
-```
-
-
-### 4. Install Dependencies
-
-```bash
-cd fleet_manager
-pip install -r requirements.txt
-```
-
-
 ### 5. Copy the commands
 ```bash
+pip install -r requirements.txt
 python manage.py migrate
 python manage.py create_admin
 python manage.py runserver
@@ -112,15 +106,20 @@ fleet_manager/
         ├── base.html              # Loads fleet.css + fleet.js
         ├── login.html             # Standalone (own styles)
         ├── dashboard.html
-        ├── vehicle_list.html / vehicle_detail.html / vehicle_form.html
+        ├── vehicle_list.html
+        ├── vehicle_detail.html
+        ├── vehicle_form.html
         ├── rto_form.html          # RTO details form
         ├── rto_doc_form.html      # Document upload with drag-and-drop
-        ├── service_list.html / service_form.html
-        ├── fuel_list.html / fuel_form.html
+        ├── service_list.html
+        ├── service_form.html
+        ├── fuel_list.html
+        ├── fuel_form.html
         ├── generic_form.html      # Tyre records
         ├── report.html            # Interactive report page
         ├── report_print.html      # Self-contained downloadable HTML
-        ├── user_list.html / user_form.html
+        ├── user_list.html
+        ├── user_form.html
         └── confirm_delete.html
 ```
 
