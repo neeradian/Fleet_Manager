@@ -23,54 +23,54 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* ----------------Fuel form live preview ----------------- */
 
-// function initFuelPreview() {
-//   const li = document.getElementById("id_litres_filled");
-//   const pr = document.getElementById("id_price_per_litre");
-//   const pt = document.getElementById("preview-total");
-//   if (!li || !pr || !pt) return;
-//   function update() {
-//     const t = (parseFloat(li.value) || 0) * (parseFloat(pr.value) || 0);
-//     pt.textContent = "₹ " + t.toFixed(2);
-//   }
-//   li.addEventListener("input", update);
-//   pr.addEventListener("input", update);
-//   update();
-// }
+function initFuelPreview() {
+  const li = document.getElementById("id_litres_filled");
+  const pr = document.getElementById("id_price_per_litre");
+  const pt = document.getElementById("preview-total");
+  if (!li || !pr || !pt) return;
+  function update() {
+    const t = (parseFloat(li.value) || 0) * (parseFloat(pr.value) || 0);
+    pt.textContent = "₹ " + t.toFixed(2);
+  }
+  li.addEventListener("input", update);
+  pr.addEventListener("input", update);
+  update();
+}
 
 /* ----------------Upload drag-and-drop ----------------- */
 
-// function initUploadZone() {
-//   const zone = document.querySelector(".upload-zone");
-//   const fileInput = document.getElementById("id_file");
-//   if (!zone || !fileInput) return;
+function initUploadZone() {
+  const zone = document.querySelector(".upload-zone");
+  const fileInput = document.getElementById("id_file");
+  if (!zone || !fileInput) return;
 
-//   zone.addEventListener("click", function () {
-//     fileInput.click();
-//   });
+  zone.addEventListener("click", function () {
+    fileInput.click();
+  });
 
-//   fileInput.addEventListener("change", function () {
-//     const name = fileInput.files[0] ? fileInput.files[0].name : "";
-//     const label = zone.querySelector(".file-chosen");
-//     if (label) label.textContent = name || "No file chosen";
-//   });
+  fileInput.addEventListener("change", function () {
+    const name = fileInput.files[0] ? fileInput.files[0].name : "";
+    const label = zone.querySelector(".file-chosen");
+    if (label) label.textContent = name || "No file chosen";
+  });
 
-//   zone.addEventListener("dragover", function (e) {
-//     e.preventDefault();
-//     zone.classList.add("drag-over");
-//   });
-//   zone.addEventListener("dragleave", function () {
-//     zone.classList.remove("drag-over");
-//   });
-//   zone.addEventListener("drop", function (e) {
-//     e.preventDefault();
-//     zone.classList.remove("drag-over");
-//     if (e.dataTransfer.files.length) {
-//       fileInput.files = e.dataTransfer.files;
-//       const label = zone.querySelector(".file-chosen");
-//       if (label) label.textContent = e.dataTransfer.files[0].name;
-//     }
-//   });
-// }
+  zone.addEventListener("dragover", function (e) {
+    e.preventDefault();
+    zone.classList.add("drag-over");
+  });
+  zone.addEventListener("dragleave", function () {
+    zone.classList.remove("drag-over");
+  });
+  zone.addEventListener("drop", function (e) {
+    e.preventDefault();
+    zone.classList.remove("drag-over");
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      const label = zone.querySelector(".file-chosen");
+      if (label) label.textContent = e.dataTransfer.files[0].name;
+    }
+  });
+}
 
 /* ----------------Report: toggle section visibility ----------------- */
 
