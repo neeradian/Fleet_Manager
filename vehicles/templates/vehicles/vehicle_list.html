@@ -20,7 +20,7 @@
         type="text"
         name="q"
         value="{{ q }}"
-        placeholder="Search vehicle no, brand, registration, owner..."
+        placeholder="Search vehicle no, brand, registration, driver..."
         style="flex: 1; max-width: 420px"
       />
       <button type="submit" class="btn btn-outline btn-sm">🔍 Search</button>
@@ -43,7 +43,7 @@
           <th>Year</th>
           <th>Fuel</th>
           <th>Odometer</th>
-          <th>Owner</th>
+          <th>Driver</th>
           <th>Added By</th>
           <th>Actions</th>
         </tr>
@@ -79,7 +79,7 @@
             <span class="badge badge-gray">{{ v.get_fuel_type_display }}</span>
           </td>
           <td><span class="km-badge">{{ v.current_km }} km</span></td>
-          <td class="text-muted">{{ v.owner_name|default:"—" }}</td>
+          <td class="text-muted">{{ v.driver_name|default:"—" }}</td>
           <td class="audit-info">
             {{ v.created_by.username|default:"—" }}<br /><span
               class="text-muted"

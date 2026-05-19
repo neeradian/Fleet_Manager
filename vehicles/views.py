@@ -181,7 +181,7 @@ def vehicle_list(request):
             Q(vehicle_no__icontains=q)
             | Q(brand__icontains=q)
             | Q(registration_no__icontains=q)
-            | Q(owner_name__icontains=q)
+            | Q(driver_name__icontains=q)
         )
     return render(request, "vehicles/vehicle_list.html", {"vehicles": qs, "q": q})
 

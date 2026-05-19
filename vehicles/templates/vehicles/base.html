@@ -109,8 +109,14 @@
           <div
             class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}"
           >
-            {% if message.tags == 'success' %}✅{% elif message.tags == 'error'
-            %}❌{% else %}⚠️{% endif %} {{ message }}
+            {% if message.tags == 'success' %}
+              ✅
+            {% elif message.tags == 'error'%}
+              ❌
+            {% else %}
+              ⚠️
+            {% endif %} 
+            {{ message }}
           </div>
           {% endfor %} {% block content %}{% endblock %}
         </div>
